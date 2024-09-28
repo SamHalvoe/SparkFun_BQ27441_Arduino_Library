@@ -17,26 +17,20 @@ SparkFun Battery Babysitter v1.0
 Arduino Uno (any 'duino should do)
 ******************************************************************************/
 
-#include "Arduino.h"
-#include <Wire.h>
 #include "SparkFunBQ27441.h"
-#include "BQ27441_Definitions.h"
 
 /*****************************************************************************
  ************************** Initialization Functions *************************
  *****************************************************************************/
 // Initializes class variables
-BQ27441::BQ27441() : _deviceAddress(BQ72441_I2C_ADDRESS), _sealFlag(false), _userConfigControl(false)
+BQ27441::BQ27441(TwoWire& io_wire = Wire) : _wire(io_wire), _deviceAddress(BQ72441_I2C_ADDRESS), _sealFlag(false), _userConfigControl(false)
 {
 }
 
 // Initializes I2C and verifies communication with the BQ27441.
-bool BQ27441::begin(void)
+bool BQ27441::begin()
 {
 	uint16_t deviceID = 0;
-	
-	Wire.begin(); // Initialize I2C master
-	
 	deviceID = deviceType(); // Read deviceType from BQ27441
 	
 	if (deviceID == BQ27441_DEVICE_ID)
@@ -698,15 +692,15 @@ bool BQ27441::writeExtendedData(uint8_t classID, uint8_t offset, uint8_t * data,
 int16_t BQ27441::i2cReadBytes(uint8_t subAddress, uint8_t * dest, uint8_t count)
 {
 	int16_t timeout = BQ72441_I2C_TIMEOUT;	
-	Wire.beginTransmission(_deviceAddress);
-	Wire.write(subAddress);
-	Wire.endTransmission(true);
+	_wire.beginTransmission(_deviceAddress);
+	_wire.write(subAddress);
+	_wire.endTransmission(true);
 	
-	Wire.requestFrom(_deviceAddress, count);
+	_wire.requestFrom(_deviceAddress, count);
 	
 	for (int i=0; i<count; i++)
 	{
-		dest[i] = Wire.read();
+		dest[i] = _wire.read();
 	}
 	
 	return timeout;
@@ -715,15 +709,13 @@ int16_t BQ27441::i2cReadBytes(uint8_t subAddress, uint8_t * dest, uint8_t count)
 // Write a specified number of bytes over I2C to a given subAddress
 uint16_t BQ27441::i2cWriteBytes(uint8_t subAddress, uint8_t * src, uint8_t count)
 {
-	Wire.beginTransmission(_deviceAddress);
-	Wire.write(subAddress);
+	_wire.beginTransmission(_deviceAddress);
+	_wire.write(subAddress);
 	for (int i=0; i<count; i++)
 	{
-		Wire.write(src[i]);
+		_wire.write(src[i]);
 	}	
-	Wire.endTransmission(true);
+	_wire.endTransmission(true);
 	
 	return true;	
 }
-
-BQ27441 lipo; // Use lipo.[] to interact with the library in an Arduino sketch

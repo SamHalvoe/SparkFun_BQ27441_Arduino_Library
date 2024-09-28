@@ -22,6 +22,7 @@ Arduino Uno (any 'duino should do)
 #define SparkFunBQ27441_h
 
 #include "Arduino.h"
+#include <Wire.h>
 #include "BQ27441_Definitions.h"
 
 #define BQ72441_I2C_TIMEOUT 2000
@@ -78,7 +79,7 @@ public:
 	/**
 	    Initializes class variables
 	*/
-	BQ27441();
+	BQ27441(TwoWire& io_wire);
 	
 	/**
 	    Initializes I2C and verifies communication with the BQ27441.
@@ -357,6 +358,7 @@ public:
 	uint16_t status(void);
 	
 private:
+	TwoWire& _wire; // reference to used I2C bus
 	uint8_t _deviceAddress;  // Stores the BQ27441-G1A's I2C address
 	bool _sealFlag; // Global to identify that IC was previously sealed
 	bool _userConfigControl; // Global to identify that user has control over 
@@ -541,7 +543,6 @@ private:
 	uint16_t i2cWriteBytes(uint8_t subAddress, uint8_t * src, uint8_t count);
 };
 
-extern BQ27441 lipo; // Use lipo.[] to interact with the library in an Arduino sketch
 // Thanks for reading!
 
 #endif
